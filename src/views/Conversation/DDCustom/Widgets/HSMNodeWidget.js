@@ -8,6 +8,7 @@ import AnswerPortWidget from "./AnswerPortWidget";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
 import { DefaultNodeModel, DefaultPortModel } from "DDCanvas/main";
 import SetGoalInNode from "Components/SetGoalInNode";
+import SetDoubleHSMButton from "Components/SetDoubleHSMButton";
 
 import events from "utils/events";
 
@@ -267,11 +268,19 @@ export class HSMNodeWidget extends React.Component {
 
     return (
       <div className="whole-question-container">
-        <div className="change-question-type-container">
-          <SetGoalInNode
-            node={node}
-            forceUpdate={this.forceUpdate.bind(this)}
-          />
+        <div className="hsm-buttons-container">
+          <div className="change-question-type-container">
+            <SetGoalInNode
+              node={node}
+              forceUpdate={this.forceUpdate.bind(this)}
+            />
+          </div>
+          <div className="set-double-hsm-container">
+            <SetDoubleHSMButton
+              node={node}
+              forceUpdate={this.forceUpdate.bind(this)}
+            />
+          </div>
         </div>
         <div
           className="question-node-v2 node-v2 hsm"

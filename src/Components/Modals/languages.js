@@ -70,6 +70,16 @@ const languages = {
     clickOnStarIcon: "Haz clic sobre el ícono con forma de estrella.",
     selectAndStartToMeasure:
       "Selecciona la meta de tu campaña y ¡Comienza a medir!",
+    doubleHSMD:
+      "Envía un segundo HSM dentro del periodo de las 24 horas sin costo adicional a todos aquellos números contactados que no respondan al primer HSM enviado",
+    selectDoubleHSMTemplate: "Selecciona una plantilla HSM",
+    selectTemplate: "Selecciona una plantilla",
+    createDoubleHSM: "Crear HSM x2",
+    defineTimeInterval: "Define el intervalo de tiempo",
+    secondHSMTimeMessage: "La segunda plantilla HSM se enviará después de:",
+    minutes: "Minutos",
+    hours: "Horas",
+    invalidSecondHSMTime: "Define un tiempo dentro del periodo de las 24 horas",
   },
   en: {
     step0: "You have currently completed step 0 of 2",
@@ -141,6 +151,16 @@ const languages = {
     placeLink: "Places a link within the message of a basic block.",
     clickOnStarIcon: "Click on the star icon.",
     selectAndStartToMeasure: "Select your campaign goal and start measuring!",
+    doubleHSMD:
+      "Send a second HSM within a period of 24 hours without additional cost to all of your contacted numbers who did not respond to the first HSM message",
+    selectDoubleHSMTemplate: "Select an HSM template",
+    selectTemplate: "Select a template",
+    createDoubleHSM: "Create HSM x2",
+    defineTimeInterval: "Define the interval of time",
+    secondHSMTimeMessage: "The second HSM message will send after:",
+    minutes: "Minutes",
+    hours: "Hours",
+    invalidSecondHSMTime: "Choose a time within a period of 24 hours",
   },
   pr: {
     step0: "Você concluiu atualmente a etapa 0 de 2",

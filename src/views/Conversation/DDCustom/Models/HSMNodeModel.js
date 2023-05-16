@@ -54,6 +54,11 @@ export class HSMNodeModel extends QuestionNodeModel {
     this.saveOnVariable = null;
     this.saveOnVariableType = null;
     this.orderedClosedPorts = [];
+    this.secondHSM = {
+      secondHSMContent: null,
+      secondHSMSendTime: null
+    }
+
   }
 
   deSerialize(object) {
@@ -161,6 +166,10 @@ export class HSMNodeModel extends QuestionNodeModel {
     return this.hsm.buttons?.options?.some(
       (button) => button.target_url !== undefined
     );
+  }
+
+  getSecondHSM() {
+    return this.secondHSM;
   }
 
   getAPISchema(nodeIDToAPIID) {
