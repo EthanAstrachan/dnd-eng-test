@@ -5,6 +5,7 @@ import {
   ANSWER_PORT_TYPE_OPEN,
   ANSWER_PORT_TYPE_CLOSED,
   ANSWER_PORT_TYPE_DEFAULT_CLOSED,
+  SECOND_HSM_TYPE,
 } from "./AnswerPortModel";
 
 import { DEFAULT_TIMER_VALUE, SECONDS_TIMER } from "./QuestionNodeModel";
@@ -28,7 +29,7 @@ const HSM_TYPE_OPEN = "OPEN";
 const configLanguage = configLanguages[getLanguage()];
 
 export class HSMNodeModel extends QuestionNodeModel {
-  constructor(hsm = { content: "", type: HSM_TYPE_OPEN, answers: [] }) {
+  constructor(hsm = { content: "", type: HSM_TYPE_OPEN, answers: [], isSecondHSM: false, parentHSMId: null}) {
     super(hsm.content);
     //this.removePort(this.getInPort());
 
@@ -56,19 +57,27 @@ export class HSMNodeModel extends QuestionNodeModel {
     this.orderedClosedPorts = [];
     this.secondHSM = {
       secondHSMContent: null,
-      secondHSMSendTime: null
+      secondHSMSendTime: null,
+      secondHSMNodeId: null,
     }
-
+    this.isSecondHSM = hsm.isSecondHSM;
+    this.parentHSMId = hsm.parentHSMId;
   }
 
   deSerialize(object) {
     super.deSerialize(object);
     this.hsm = object.hsm;
+    this.secondHSM = object.secondHSM;
+    this.isSecondHSM = object.isSecondHSM;
+    this.parentHSMId = object.parentHSMId;
   }
 
   serialize() {
     return _.merge(super.serialize(), {
       hsm: this.hsm,
+      secondHSM: this.secondHSM,
+      isSecondHSM: this.isSecondHSM,
+      parentHSMId: this.parentHSMId,
     });
   }
   setMessageLimitAndTimerDefault() {
@@ -170,6 +179,33 @@ export class HSMNodeModel extends QuestionNodeModel {
 
   getSecondHSM() {
     return this.secondHSM;
+  }
+
+  getSecondHSMPort() {
+    const outPorts = Object.values(this.getPorts()).filter(
+      (port) => port.in == false
+    );
+    return outPorts.filter(
+      (port) => port.answerType === SECOND_HSM_TYPE
+    );
+  }
+
+  addSecondHSM(node, time, secondNodeId) {
+    this.secondHSM = {
+      secondHSMContent: node.serialize(),
+      secondHSMSendTime: time,
+      secondHSMNodeId: secondNodeId
+    }
+
+    super.addPort(new AnswerPortModel("Test", SECOND_HSM_TYPE))
+  }
+
+  deleteSecondHSM() {
+    this.secondHSM = {
+      secondHSMContent: null,
+      secondHSMSendTime: null,
+      secondHSMNodeId: null,
+    }
   }
 
   getAPISchema(nodeIDToAPIID) {

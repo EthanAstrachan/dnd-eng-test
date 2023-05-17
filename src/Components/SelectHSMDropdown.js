@@ -48,8 +48,6 @@ export default class SelectHSMDropdown extends PureComponent {
 
     this.setState({ selectedOption: option });
 
-    console.log(close)
-
     if (typeof close === "boolean") {
       this.setState({ open: !close });
       this.drowpdownRef.instanceRef.toggle(!close);

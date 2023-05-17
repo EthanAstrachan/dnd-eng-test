@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from "react";
 import getLanguage from "getLanguage.js";
 import languages from "./languages";
-import constants from "../../assets/constants";
 import "./CreateDoubleHSMModal.scss";
 import { Modal } from "antd";
 import SelectDropdown from "Components/SelectDropdown";
 import SelectHSMDropdown from "Components/SelectHSMDropdown";
-import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { operations } from "views/Conversation/duck";
 import { connect } from "react-redux";
 import TextInput from "Components/TextInput";
+import {HSMNodeModel} from "views/Conversation/DDCustom/main";
 
 const language = languages[getLanguage()];
 const CreateDoubleHSMModalComponent = (props) => {
+    
     const initialState = {
         secondHSM: null,
         secondHSMSendTime: {
             value: "10",
-            type: 'Minutes'
+            type: language.minutes
         },
-        isValidTimeFrame: true,
+        isValidTimeFrame: false,
     };
 
     const [state, setState] = useState(initialState);
@@ -30,14 +30,29 @@ const CreateDoubleHSMModalComponent = (props) => {
         dispatch(operations.fetchHSMList())
     }, [dispatch])
 
+
+    // Displays the correct second HSM when the modal is loaded
+    useEffect(() => {
+        const {node} = props;
+        if (node.secondHSM.secondHSMContent) {
+            const secondHSMNode = new HSMNodeModel();
+            secondHSMNode.deSerialize(node.secondHSM.secondHSMContent)
+            const {name, content} = secondHSMNode.hsm;
+            setState({...state,
+                secondHSM: {name, content},
+                secondHSMSendTime: node.secondHSM.secondHSMSendTime
+            })
+        }
+    }, [props.show])
+
     useEffect(() => {
         const {value, type} = state.secondHSMSendTime;
         let valid = false;
         const intValue = parseInt(value);
 
-        if (type === 'Minutes' && Number.isInteger(intValue) && intValue <= 60 && intValue > 0) {
+        if (type === language.minutes && Number.isInteger(intValue) && intValue <= 1440 && intValue > 0) {
             valid = true
-        } else {
+        } else if (type === language.hours) {
             if (Number.isInteger(intValue) && intValue <= 24 && intValue > 0) {
                 valid = true
             }
@@ -51,77 +66,33 @@ const CreateDoubleHSMModalComponent = (props) => {
         state.isValidTimeFrame && state.secondHSM
 
     const createDoubleHSM = () => {
-        if (
-            [...new Set(state.targetEvents.map((target) => target?.url))].length !=
-            state.targetEvents.map((target) => target?.url).length
-        ) {
-            toast.error(language.repeatedUrls, {
-            position: "top-center",
-            autoClose: false,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: false,
-            progress: undefined,
-            theme: "dark",
-            });
-            return;
+        const {node, diagramEngine} = props;
+        const {secondHSM, secondHSMSendTime} = state;
+
+        let secondHSMNodeId = node.secondHSM.secondHSMNodeId;
+        let diagramModel = diagramEngine.getDiagramModel();
+        let nodeModel = new HSMNodeModel({...secondHSM, isSecondHSM: true, parentHSMId: node.getID()});
+
+        if (!node.secondHSM.secondHSMContent) {
+            nodeModel.x = props.node.x + 400;
+            nodeModel.y = props.node.y;
+            secondHSMNodeId = nodeModel.getID();
+        } 
+        else {
+            const secondHSMNode = new HSMNodeModel();
+            secondHSMNode.deSerialize(node.secondHSM.secondHSMContent)
+            nodeModel.id = secondHSMNode.getID();
+            nodeModel.x = secondHSMNode.x;
+            nodeModel.y = secondHSMNode.y;
         }
 
-        const targetEvents = [];
-
-        state.targetEvents.map((target) => {
-            const targetEvent = {
-            type: target.type,
-            };
-            if (
-            [
-                constants.TARGET_EVENT_BUTTON_LINK,
-                constants.TARGET_EVENT_LINK,
-            ].includes(target.type) &&
-            target.url
-            ) {
-            targetEvent["url"] = target.url;
-            targetEvent["expectationValue"] = Math.min(
-                Math.max(Number(target.expectationValue), 0),
-                100
-            );
-            }
-            targetEvents.push(targetEvent);
-        });
-
-        props.node.updateGoalMeasurement({
-            campaignGoal: state.campaignGoal,
-            targetEvents: targetEvents,
-        });
-
-        props.setConfigured();
-        props.forceUpdate();
+        diagramModel.addNode(nodeModel);
+        diagramEngine.forceUpdate();
+        
+        node.addSecondHSM(nodeModel, secondHSMSendTime, secondHSMNodeId)
+        diagramModel.updateHistoryDueToSecondHSM();
+        props.closeModal()
     };
-
-    // const renderTriggerComponent = (value, defaultValue, field) => {
-    //     if (field == "target") {
-    //         const targetType = value ? value.toLowerCase() : "";
-    //         value = TARGET_EVENT_OPTIONS.filter((e) => e.value == value)[0]?.label;
-    //         return (
-    //         <button className={`${targetType ? "selected" : ""}`}>
-    //             <div className="selected-item-container">
-    //             <div
-    //                 className={targetType ? `${targetType}-icon` : "gold-goal-icon"}
-    //             ></div>
-    //             <p className="r">{value || defaultValue}</p>
-    //             </div>
-    //             <div className="dropdown-arrow" />
-    //         </button>
-    //         );
-    //     }
-    //     return (
-    //         <button className={`${value ? "selected" : ""}`}>
-    //         <p className="r">{value || defaultValue}</p>
-    //         <div className="dropdown-arrow" />
-    //         </button>
-    //     );
-    // };
 
     const renderHSMDropdownItem = (name, content) => {
         return (
@@ -161,14 +132,9 @@ const CreateDoubleHSMModalComponent = (props) => {
                     options={props.hsmList}
                     display={(item) => renderHSMDropdownItem(item.name, item.content)}
                     toSearchStr={(item) => (item.name + item.content).toLowerCase()}
-                    onSelect={(target) => {setState({ ...state, secondHSM: target})}}
+                    onSelect={(target) => {setState({ ...state, secondHSM: {...target, _class: "HSMNodeModel"}})}}
                     hideOnOptionClick={true}
-                    // triggerComponent={
-                    //     renderTriggerComponent(
-                    //         props.hsmList.filter((e) => e.id == state.secondHSM.id),
-                    //         language.selectTemplate
-                    //     )
-                    // }
+                    value={state.secondHSM}
                 />
             </div>
             <div className="dashed-divider"></div>
@@ -199,7 +165,7 @@ const CreateDoubleHSMModalComponent = (props) => {
                     />
                 </div>
                 <div className="invalid-hsm-send-time">
-                    {!state.isValidTimeFrame ? language.invalidSecondHSMTime : null}
+                    {!state.isValidTimeFrame && state.secondHSMSendTime.type ? language.invalidSecondHSMTime : null}
                 </div>
             </div>
         </div>

@@ -6,9 +6,12 @@ import FileViewer from "react-file-viewer";
 import InputPortWidget from "./InputPortWidget";
 import AnswerPortWidget from "./AnswerPortWidget";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
-import { DefaultNodeModel, DefaultPortModel } from "DDCanvas/main";
 import SetGoalInNode from "Components/SetGoalInNode";
 import SetDoubleHSMButton from "Components/SetDoubleHSMButton";
+import CreateDoubleHSMModal from "Components/Modals/CreateDoubleHSMModal";
+import {HSMNodeModel} from "views/Conversation/DDCustom/main";
+import _ from "lodash";
+
 
 import events from "utils/events";
 
@@ -22,7 +25,35 @@ export class HSMNodeWidget extends React.Component {
     this.changeDrag = this.changeDrag.bind(this);
     this.state = {
       canDrag: false,
+      connectionButtonHover: false,
+      showModal: false
     };
+  }
+
+  componentDidMount() {
+    const {node, diagramEngine} = this.props;
+    if (node.secondHSM?.secondHSMContent) {
+      const secondHSMContent = new HSMNodeModel();
+      secondHSMContent.deSerialize(node.secondHSM.secondHSMContent)
+      let diagramModel = diagramEngine.getDiagramModel();
+      let nodeModel = new HSMNodeModel({...secondHSMContent.hsm, isSecondHSM: true, parentHSMId: node.getID()});
+
+      if (!secondHSMContent) {
+        nodeModel.x = this.props.node.x + 400;
+        nodeModel.y = this.props.node.y;
+        // secondHSMNodeId = nodeModel.getID();
+      } else {
+          let secondHSMNode = secondHSMContent;
+          if (secondHSMNode) {
+            nodeModel.id = this.props.node.secondHSM.secondHSMNodeId;
+            nodeModel.x = secondHSMNode.x;
+            nodeModel.y = secondHSMNode.y;
+          }
+      }
+
+      diagramModel.addNode(nodeModel);
+      diagramEngine.forceUpdate();
+    }
   }
 
   renderInputPort() {
@@ -254,6 +285,82 @@ export class HSMNodeWidget extends React.Component {
     );
   }
 
+  deleteSecondHSMNode() {
+    const {node, diagramEngine} = this.props;
+
+    const diagramModel = diagramEngine.getDiagramModel();
+    const secondHSMNode = diagramModel.getNode(node.secondHSM.secondHSMNodeId);
+    diagramModel.removeNode(secondHSMNode);
+    diagramEngine.forceUpdate();
+    node.deleteSecondHSM();
+  }
+
+  renderDoubleHSMButtons() {
+    const {node} = this.props;
+
+    if (!node.secondHSM.secondHSMContent) return;
+
+    const {type, value} = node.secondHSM.secondHSMSendTime;
+
+    const answerOpenPort = node.getAnswerOpenPort();
+
+    if (!answerOpenPort) return null;
+
+    return (
+      <div className="buttons-container">
+        <button
+            className={'double-hsm-connection-button'}
+            onMouseEnter={() => this.setState({connectionButtonHover: true})}
+            onMouseLeave={() => this.setState({connectionButtonHover: false})}
+          >
+            {
+              this.state.connectionButtonHover ? 
+                <div>
+                  <span className="button-text" onClick={() => this.setState({showModal: true })}>{language.edit}</span> &nbsp; | &nbsp;
+                  <span className="button-text" onClick={() => this.deleteSecondHSMNode()}>{language.delete}</span>
+                </div> : 
+                <div className="double-hsm-connection-button-content">
+                  <i className="icon icon--alarm-clock" />
+                  <p className="hsm-connection-button-text">
+                    {`${value} ${type}`}
+                  </p>
+                </div>
+            }
+        </button>
+      </div>
+    )
+  }
+
+  renderHSMEditButtonPort() {
+    const { node } = this.props;
+    const secondHSMPort = node.getSecondHSMPort()[0];
+
+    if (!secondHSMPort) return null;
+
+    return (
+      <div className="default-answer-port-container">
+        <AnswerPortWidget
+          diagramEngine={this.props.diagramEngine}
+          port={secondHSMPort}
+          key={secondHSMPort.getID()}
+        > {this.renderDoubleHSMButtons()} 
+        </AnswerPortWidget>
+      </div>
+    );
+  }
+
+  renderCreateTargetModal() {
+    return (
+      <CreateDoubleHSMModal
+        show={this.state.showModal}
+        closeModal={() => this.setState({showModal: false })}
+        node={this.props.node}
+        forceUpdate={this.props.forceUpdate}
+        diagramEngine={this.props.diagramEngine}
+      />
+    );
+  }
+
   render() {
     const { node } = this.props;
     const answerOpenPort = node.getAnswerOpenPort();
@@ -275,11 +382,16 @@ export class HSMNodeWidget extends React.Component {
               forceUpdate={this.forceUpdate.bind(this)}
             />
           </div>
+          {
+            !node.secondHSM.secondHSMContent && !node.isSecondHSM ? 
+              <SetDoubleHSMButton
+                node={node}
+                forceUpdate={this.forceUpdate.bind(this)}
+                diagramEngine={this.props.diagramEngine}
+              /> : null
+          }
           <div className="set-double-hsm-container">
-            <SetDoubleHSMButton
-              node={node}
-              forceUpdate={this.forceUpdate.bind(this)}
-            />
+            
           </div>
         </div>
         <div
@@ -296,6 +408,8 @@ export class HSMNodeWidget extends React.Component {
           {this.renderAnswerClosedPorts()}
           {this.renderDefaultClosedAnswerPort()}
           {this.renderCallToActionButtons()}
+          {this.renderDoubleHSMButtons()}
+          {/* {this.renderHSMEditButtonPort()} */}
         </div>
       </div>
     );

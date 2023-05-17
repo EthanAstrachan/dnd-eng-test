@@ -125,6 +125,11 @@ export class DiagramModel extends BaseEntity {
     this.historyChanged();
   }
 
+  updateHistoryDueToSecondHSM() {
+    this.history[this.historyIndex] = this.serializeDiagram();
+    console.log("UPDATE HISTORY", this.history, this.historyIndex);
+  }
+
   canUndo() {
     return (
       this.historyIndex - 1 < this.history.length && this.historyIndex >= 1
@@ -378,6 +383,18 @@ export class DiagramModel extends BaseEntity {
           listener.nodesUpdated();
         }
       });
+
+      if (node.secondHSM?.secondHSMContent) {
+        const secondHSMNode = this.getNode(node.secondHSM.secondHSMNodeId);
+        this.removeNode(secondHSMNode);
+      }
+
+      if (node.isSecondHSM) {
+        const parentNode = this.getNode(node.parentHSMId);
+        if (parentNode) {
+          parentNode.deleteSecondHSM();
+        }
+      }
     } else {
       delete this.nodes[_.toString(node)];
       this.itterateListeners((listener) => {

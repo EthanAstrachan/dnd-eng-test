@@ -78,7 +78,7 @@ $iconsPath: "~assets/icons";
         display: flex;
         flex-direction: column;
         max-height: 54vh;
-        overflow-y: auto;
+        overflow: hidden;
         .select-double-hsm-time-container,
         .select-double-hsm-message-container {
           p {

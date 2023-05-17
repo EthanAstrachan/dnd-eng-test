@@ -47,3 +47,35 @@ $imagesPath: "~assets/images";
     text-align: end;
 }
 
+.double-hsm-connection-button {
+    width: 100%;
+    height: 44px;
+    background: #303030;
+    border-radius: 2px;
+    border: none;
+    color: white;
+    cursor: default;
+
+    &:hover {
+        color: #6F737D
+    }
+
+    .button-text {
+        color: #6F737D;
+
+        &:hover {
+            color: white
+        }
+    }
+
+    .double-hsm-connection-button-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .hsm-connection-button-text {
+            margin-left: 9px !important;
+        }
+    }    
+}
+
