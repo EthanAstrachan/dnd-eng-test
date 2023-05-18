@@ -96,8 +96,8 @@ export class AnswerPortModel extends DefaultPortModel {
     return this.answerType;
   }
 
-  getTimeout(timeout) {
-    return Number(timeout);
+  getTimeout() {
+    return this.timeout;
   }
 
   setTimeout(timeout) {

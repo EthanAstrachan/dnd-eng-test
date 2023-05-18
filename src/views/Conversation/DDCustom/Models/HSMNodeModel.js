@@ -5,6 +5,7 @@ import {
   ANSWER_PORT_TYPE_OPEN,
   ANSWER_PORT_TYPE_CLOSED,
   ANSWER_PORT_TYPE_DEFAULT_CLOSED,
+  ANSWER_PORT_TYPE_TIMEOUT,
   SECOND_HSM_TYPE,
 } from "./AnswerPortModel";
 
@@ -13,6 +14,7 @@ import { DEFAULT_TIMER_VALUE, SECONDS_TIMER } from "./QuestionNodeModel";
 import configLanguages from "../../languages";
 import getLanguage from "getLanguage.js";
 import constants from "assets/constants.js";
+import {LinkModel} from "../../../../DDCanvas/Common";
 
 const VAR_TEXT = "TEXT";
 const VAR_ALL = "ALL";
@@ -160,7 +162,14 @@ export class HSMNodeModel extends QuestionNodeModel {
 
   setAreHiddenClosedAnswers(val) {}
 
-  addNotAnswerTimeoutPort() {}
+  addNotAnswerTimeoutPort(timeout) {
+    if (this.getNotAnswerTimeoutPort()) return;
+
+    const timeoutPort = new AnswerPortModel("", ANSWER_PORT_TYPE_TIMEOUT);
+    timeoutPort.setTimeout(timeout);
+    
+    this.addPort(timeoutPort);
+  }
 
   getAnswerClosedPorts() {
     const outPorts = Object.values(this.getPorts()).filter(
@@ -197,7 +206,31 @@ export class HSMNodeModel extends QuestionNodeModel {
       secondHSMNodeId: secondNodeId
     }
 
-    super.addPort(new AnswerPortModel("Test", SECOND_HSM_TYPE))
+    const value = parseInt(time.value)
+    const timeout = time.type === configLanguage.minutes ? value : value * 60;
+    this.addNotAnswerTimeoutPort(timeout);
+  }
+
+  addSecondHSMLink(diagramEngine) {
+    const link = new LinkModel();
+    const outPorts = Object.values(this.getPorts()).filter(
+      (port) => port.in == false
+    );
+
+    const timeoutPorts = outPorts.filter(
+      (port) => port.answerType === ANSWER_PORT_TYPE_TIMEOUT
+    ); 
+
+    link.setSourcePort(timeoutPorts[0])
+    let diagramModel = diagramEngine.getDiagramModel();
+    const secondHSMContent = diagramModel.getNode(this.secondHSM.secondHSMNodeId);
+    // secondHSMContent.deSerialize(this.secondHSM.secondHSMContent)
+    const inPorts = Object.values(secondHSMContent.getPorts()).filter(
+      (port) => port.in == true
+    );
+    link.setTargetPort(inPorts[0])
+    diagramModel.addLink(link);
+    diagramEngine.forceUpdate();
   }
 
   deleteSecondHSM() {
@@ -268,6 +301,19 @@ export class HSMNodeModel extends QuestionNodeModel {
         } else {
           apiSchema["save_on_classified_type"] = variableType;
         }
+      }
+    }
+
+    const timeoutPort = this.getNotAnswerTimeoutPort();
+    if (timeoutPort) {
+      let targetNode = timeoutPort.getTargetNode();
+
+      if (targetNode) {
+        apiSchema["question_not_answer_timeout"] = {
+          seconds: timeoutPort.getTimeout() * 60,
+          to_question_id: nodeIDToAPIID(targetNode.getID()),
+          webhook: timeoutPort.getWebhook(),
+        };
       }
     }
     return apiSchema;

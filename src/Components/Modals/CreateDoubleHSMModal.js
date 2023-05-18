@@ -91,6 +91,7 @@ const CreateDoubleHSMModalComponent = (props) => {
         diagramEngine.forceUpdate();
         
         node.addSecondHSM(nodeModel, secondHSMSendTime, secondHSMNodeId)
+        node.addSecondHSMLink(diagramEngine);
         diagramModel.updateHistoryDueToSecondHSM();
         props.closeModal()
     };
