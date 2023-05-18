@@ -10,6 +10,7 @@ import { operations } from "views/Conversation/duck";
 import { connect } from "react-redux";
 import TextInput from "Components/TextInput";
 import {HSMNodeModel} from "views/Conversation/DDCustom/main";
+import {Tooltip} from "antd";
 
 const language = languages[getLanguage()];
 const CreateDoubleHSMModalComponent = (props) => {
@@ -94,14 +95,44 @@ const CreateDoubleHSMModalComponent = (props) => {
         props.closeModal()
     };
 
-    const renderHSMDropdownItem = (name, content) => {
+    const renderHSMDropdownItem = (hsm) => {
         return (
             <div>
-                <p className="r lh-22 hsm-dropdown-item-title">{name}</p>
-                <p className="r lh-22 hsm-dropdown-item-content">{content}</p>
+                <p className="r lh-22 hsm-dropdown-item-title">{hsm.name}</p>
+                <p className="r lh-22 hsm-dropdown-item-content">{hsm.content}</p>
             </div>
         );
     };
+
+    const renderHsmTooltip = (hsm) => {
+        if (hsm.status == "PAUSED") {
+            const metaDoc =
+            "developers.facebook.com/docs/whatsapp/message-templates/guidelines#template-pausing";
+            return (
+              <>
+                <p className="paused">{language.hsmPausedText}</p>
+                <a href={`https://${metaDoc}`} target="_blank">
+                  {metaDoc}
+                </a>
+              </>
+            );
+          } else {
+            return (
+              <>
+                <p>{hsm.header?.text ? hsm.header.text : hsm.header?.url}</p>
+                <p>{hsm.content}</p>
+                <p>{hsm.footer?.text ? hsm.footer.text : ""}</p>
+                {hsm.buttons?.options.map((button) => {
+                  return (
+                    <p key={hsm.buttons?.options.indexOf(button)}>
+                      {button.text}
+                    </p>
+                  );
+                })}
+              </>
+            );
+          }
+    }
 
     const renderTimeDropdownItem = (timeFrame) => {
         const icon =
@@ -114,6 +145,15 @@ const CreateDoubleHSMModalComponent = (props) => {
             </>
         );
     }
+
+    const renderTooltip = () => {
+        return (
+            <div>
+                 <p>{language.secondHSMTimingReminder}</p>
+            </div>
+           
+        );
+      };
 
     const getModalBody = () => {
         return (
@@ -130,11 +170,12 @@ const CreateDoubleHSMModalComponent = (props) => {
                 </div>
                 <SelectHSMDropdown
                     options={props.hsmList}
-                    display={(item) => renderHSMDropdownItem(item.name, item.content)}
+                    display={(item) => renderHSMDropdownItem(item)}
                     toSearchStr={(item) => (item.name + item.content).toLowerCase()}
                     onSelect={(target) => {setState({ ...state, secondHSM: {...target, _class: "HSMNodeModel"}})}}
                     hideOnOptionClick={true}
                     value={state.secondHSM}
+                    renderHsmTooltip={renderHsmTooltip}
                 />
             </div>
             <div className="dashed-divider"></div>
@@ -144,6 +185,15 @@ const CreateDoubleHSMModalComponent = (props) => {
                         <p>2</p>
                     </span>
                     <p>{language.defineTimeInterval}</p>
+                    <Tooltip
+                        overlayClassName="hsm-select-timing-reminder"
+                        placement="left"
+                        title={renderTooltip()}
+                        >
+                            <div>
+                                <i class="fa fa-exclamation-circle" />
+                            </div>
+                    </Tooltip>
                 </div>
                 <div className="select-hsm-time-interval-container">
                     <div className="select-hsm-time-interval-description">{language.secondHSMTimeMessage}</div>

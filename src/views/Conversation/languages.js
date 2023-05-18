@@ -356,6 +356,7 @@ module.exports = {
       "👉 Conoce los flujos que generan mayor conversión 💥",
     conversationsTemplatesModalButton1: "Conocer flujos",
     conversationsTemplatesModalButton2: "No me interesa",
+    secondHSMSelectNoResultsMessage: "Oops! No hay resultados. 👀 Prueba con otro nombre",
   },
   en: {
     googleTitle: "Integration with Google sheets",
@@ -713,6 +714,7 @@ module.exports = {
       "👉 Know the flows that generate the highest conversion 💥",
     conversationsTemplatesModalButton1: "Know flows",
     conversationsTemplatesModalButton2: "I'm not interested",
+    secondHSMSelectNoResultsMessage: "Oops! There are no results. 👀 Search with another name",
   },
   pr: {
     googleTitle: "Integração com planilhas do Google",

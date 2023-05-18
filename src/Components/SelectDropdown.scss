@@ -99,7 +99,7 @@
 .hsm-select-dropdown {
   .dropdown-options {
     overflow-y: scroll;
-    height: 250px;
+    max-height: 250px;
     overflow-x: hidden;
   }
 
@@ -107,6 +107,7 @@
     overflow: hidden;
     width: 480px;
     position: fixed;
+    height: auto;
   }
 
   .input, .textarea {
@@ -131,5 +132,14 @@
   .dropdown-item {
     padding: 8px 15px 8px 10px !important;
     margin-left: 16px !important;
+  }
+
+  .no-results {
+    cursor: default !important;
+    color: white !important;
+
+    &:hover {
+      background-color: transparent !important;
+    }
   }
 }

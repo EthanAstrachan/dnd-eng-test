@@ -153,6 +153,20 @@ $iconsPath: "~assets/icons";
         .select-hsm-time-interval-title {
           display: flex;
           align-items: center;
+
+          .fa-exclamation-circle {
+            margin-left: 8px
+          }
+
+          .hsm-select-timing-reminder {
+            background: #5727B0;
+            border-radius: 4px;
+            padding: 12px 17px;
+
+            p {
+              margin: 0;
+            }
+          }
         }
         .double-hsm-circle {
             box-sizing: border-box;

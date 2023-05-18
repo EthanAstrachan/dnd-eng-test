@@ -4,6 +4,7 @@ import Dropdown from "./DropdownV2";
 import TextInput from "./TextInput";
 import getLanguage from "getLanguage.js";
 import languages from "views/Conversation/languages";
+import {Tooltip} from "antd";
 
 import "./SelectDropdown.scss";
 
@@ -100,10 +101,9 @@ export default class SelectHSMDropdown extends PureComponent {
     else return item;
   };
 
-
   renderSearchbar = () => {
     return (
-        <div className="searchbar">
+        <div className="searchbar" onClick={(e) => e.stopPropagation()}>
           <div className={`control ${this.state.searchText === "" ? 'has-icons-left' : ''} has-icons-right`}>
             { this.state.searchText === "" ?
               <span className="icon is-small is-left" style={{color: "#767676"}}>
@@ -112,7 +112,6 @@ export default class SelectHSMDropdown extends PureComponent {
               <span 
                 className="icon is-small is-right white" 
                 style={{color: "#F1F2F2", cursor: "pointer"}}
-                onClick={() => this.setState({searchText: ""})}
               >
                 <i className="fas fa-times-circle"/>
               </span>
@@ -160,19 +159,27 @@ export default class SelectHSMDropdown extends PureComponent {
         > 
           {this.renderSearchbar()}
           <div className="dropdown-options" >
-            {options.map((e) => {
+            {options.length > 0 ? options.map((e) => {
               return (
-                <div
-                  key={this.props.options.indexOf(e)}
-                  className="dropdown-item"
-                  onClick={() => {
-                    this.selectOption(e, onSelect);
-                  }}
+                <Tooltip
+                    overlayClassName={`hsm ${e.status}`}
+                    placement="rightBottom"
+                    title={this.props.renderHsmTooltip(e)}
                 >
-                  {this.displayItem(e)}
-                </div>
-              );
-            })}
+                  <div
+                    key={this.props.options.indexOf(e)}
+                    className="dropdown-item"
+                    onClick={() => {
+                      this.selectOption(e, onSelect);
+                    }}
+                  >
+                    {this.displayItem(e)}
+                  </div>
+                </Tooltip>
+              )}) : 
+                <div className="dropdown-item no-results" onClick={(e) => e.stopPropagation()}>
+                  {this.displayItem({name: "", content: this.language.secondHSMSelectNoResultsMessage})}
+                </div>}
           </div>
         </Dropdown>
       </div>

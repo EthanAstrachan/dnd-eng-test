@@ -777,4 +777,10 @@ button.btn,
     width: 16px;
     height: 16px;
   }
+
+  &--warning {
+    background-image: url(#{$iconsPath}/Attention-Icon.svg);
+    width: 16px;
+    height: 16px;
+  }
 }

@@ -80,6 +80,8 @@ const languages = {
     minutes: "Minutos",
     hours: "Horas",
     invalidSecondHSMTime: "Define un tiempo dentro del periodo de las 24 horas",
+    secondHSMTimingReminder: 
+      "Recuerda que es importante definir un intervalo de tiempo que no sea tan corto entre el primer HSM y el segundo, de lo contrario tus contactos podrían tomarlo como spam."
   },
   en: {
     step0: "You have currently completed step 0 of 2",
@@ -161,6 +163,8 @@ const languages = {
     minutes: "Minutes",
     hours: "Hours",
     invalidSecondHSMTime: "Choose a time within a period of 24 hours",
+    secondHSMTimingReminder: 
+      "Remember that it's important to choose a time interval that is not too short between the first and second HSM, since your contacts might think it's spam"
   },
   pr: {
     step0: "Você concluiu atualmente a etapa 0 de 2",
