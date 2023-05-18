@@ -737,6 +737,10 @@ export class DiagramWidgetComponent extends React.Component {
         node.id = gMap[node.id] = Toolkit.UID();
         nodeOb.deSerialize(node);
 
+        if (diagramModel.hasSecondHSMNode && nodeOb.getSecondHSM().secondHSMContent) {
+          nodeOb.deleteSecondHSM()
+        }
+
         // Deserialize ports
         _.forEach(node.ports, (port) => {
           const portOb = diagramEngine

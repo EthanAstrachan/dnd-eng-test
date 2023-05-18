@@ -1788,6 +1788,18 @@ textarea.answer-timeout-text-area {
       }
     }
   }
+
+  &.hsm-select-timing-reminder {
+    .ant-tooltip-inner {
+      background: #5727B0;
+      border-radius: 4px;
+      padding: 12px 17px;
+
+      p {
+        margin: 0;
+      }
+    }
+  }
 }
 
 svg {

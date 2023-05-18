@@ -20,6 +20,7 @@ export const ANSWER_PORT_TYPE_CLOSED_CONTROLLED = "CLOSED_CONTROLLED";
 export const ANSWER_PORT_TYPE_DEFAULT_CLOSED = "DEFAULT_CLOSED";
 export const HELPDESK_ACTION_TYPE = "HELPDESK_ACTION";
 export const HELPDESK_TICKET_TYPE = "HELPDESK_TICKET";
+export const SECOND_HSM_TYPE = "SECOND_HSM";
 
 export class AnswerPortModel extends DefaultPortModel {
   constructor(
@@ -95,8 +96,8 @@ export class AnswerPortModel extends DefaultPortModel {
     return this.answerType;
   }
 
-  getTimeout(timeout) {
-    return Number(timeout);
+  getTimeout() {
+    return this.timeout;
   }
 
   setTimeout(timeout) {

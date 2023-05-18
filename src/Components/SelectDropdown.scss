@@ -95,3 +95,51 @@
     }
   }
 }
+
+.hsm-select-dropdown {
+  .dropdown-options {
+    overflow-y: scroll;
+    max-height: 250px;
+    overflow-x: hidden;
+  }
+
+  .dropdown-content {
+    overflow: hidden;
+    width: 480px;
+    position: fixed;
+    height: auto;
+  }
+
+  .input, .textarea {
+    border-color: #767676;
+    background-color: #202020;
+    color: #767676;
+
+    &:focus {
+      color: white;
+      border-color: #6464FF;
+    }
+  }
+
+  .input::placeholder {
+    color: #767676;
+  }
+
+  .searchbar {
+    padding: 18px 15.5px;
+  }
+
+  .dropdown-item {
+    padding: 8px 15px 8px 10px !important;
+    margin-left: 16px !important;
+  }
+
+  .no-results {
+    cursor: default !important;
+    color: white !important;
+
+    &:hover {
+      background-color: transparent !important;
+    }
+  }
+}

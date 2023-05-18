@@ -5,6 +5,8 @@ import {
   ANSWER_PORT_TYPE_OPEN,
   ANSWER_PORT_TYPE_CLOSED,
   ANSWER_PORT_TYPE_DEFAULT_CLOSED,
+  ANSWER_PORT_TYPE_TIMEOUT,
+  SECOND_HSM_TYPE,
 } from "./AnswerPortModel";
 
 import { DEFAULT_TIMER_VALUE, SECONDS_TIMER } from "./QuestionNodeModel";
@@ -12,6 +14,7 @@ import { DEFAULT_TIMER_VALUE, SECONDS_TIMER } from "./QuestionNodeModel";
 import configLanguages from "../../languages";
 import getLanguage from "getLanguage.js";
 import constants from "assets/constants.js";
+import {LinkModel} from "../../../../DDCanvas/Common";
 
 const VAR_TEXT = "TEXT";
 const VAR_ALL = "ALL";
@@ -28,7 +31,7 @@ const HSM_TYPE_OPEN = "OPEN";
 const configLanguage = configLanguages[getLanguage()];
 
 export class HSMNodeModel extends QuestionNodeModel {
-  constructor(hsm = { content: "", type: HSM_TYPE_OPEN, answers: [] }) {
+  constructor(hsm = { content: "", type: HSM_TYPE_OPEN, answers: [], isSecondHSM: false, parentHSMId: null}) {
     super(hsm.content);
     //this.removePort(this.getInPort());
 
@@ -54,16 +57,29 @@ export class HSMNodeModel extends QuestionNodeModel {
     this.saveOnVariable = null;
     this.saveOnVariableType = null;
     this.orderedClosedPorts = [];
+    this.secondHSM = {
+      secondHSMContent: null,
+      secondHSMSendTime: null,
+      secondHSMNodeId: null,
+    }
+    this.isSecondHSM = hsm.isSecondHSM;
+    this.parentHSMId = hsm.parentHSMId;
   }
 
   deSerialize(object) {
     super.deSerialize(object);
     this.hsm = object.hsm;
+    this.secondHSM = object.secondHSM;
+    this.isSecondHSM = object.isSecondHSM;
+    this.parentHSMId = object.parentHSMId;
   }
 
   serialize() {
     return _.merge(super.serialize(), {
       hsm: this.hsm,
+      secondHSM: this.secondHSM,
+      isSecondHSM: this.isSecondHSM,
+      parentHSMId: this.parentHSMId,
     });
   }
   setMessageLimitAndTimerDefault() {
@@ -146,7 +162,23 @@ export class HSMNodeModel extends QuestionNodeModel {
 
   setAreHiddenClosedAnswers(val) {}
 
-  addNotAnswerTimeoutPort() {}
+  addNotAnswerTimeoutPort(timeout) {
+    if (this.getNotAnswerTimeoutPort()) return;
+
+    const timeoutPort = new AnswerPortModel("", ANSWER_PORT_TYPE_TIMEOUT);
+    timeoutPort.setTimeout(timeout);
+    
+    this.addPort(timeoutPort);
+  }
+
+  getNotAnswerTimeoutPort() {
+    const outPorts = Object.values(this.getPorts()).filter(
+      (port) => port.in == false
+    );
+    return outPorts.filter(
+      (port) => port.answerType === ANSWER_PORT_TYPE_TIMEOUT
+    )[0];
+  }
 
   getAnswerClosedPorts() {
     const outPorts = Object.values(this.getPorts()).filter(
@@ -161,6 +193,61 @@ export class HSMNodeModel extends QuestionNodeModel {
     return this.hsm.buttons?.options?.some(
       (button) => button.target_url !== undefined
     );
+  }
+
+  getSecondHSM() {
+    return this.secondHSM;
+  }
+
+  getSecondHSMPort() {
+    const outPorts = Object.values(this.getPorts()).filter(
+      (port) => port.in == false
+    );
+    return outPorts.filter(
+      (port) => port.answerType === SECOND_HSM_TYPE
+    );
+  }
+
+  addSecondHSM(node, time, secondNodeId) {
+    this.secondHSM = {
+      secondHSMContent: node.serialize(),
+      secondHSMSendTime: time,
+      secondHSMNodeId: secondNodeId
+    }
+
+    const value = parseInt(time.value)
+    const timeout = time.type === configLanguage.minutes ? value : value * 60;
+    this.addNotAnswerTimeoutPort(timeout);
+  }
+
+  addSecondHSMLink(diagramEngine) {
+    const link = new LinkModel();
+    const outPorts = Object.values(this.getPorts()).filter(
+      (port) => port.in == false
+    );
+
+    const timeoutPorts = outPorts.filter(
+      (port) => port.answerType === ANSWER_PORT_TYPE_TIMEOUT
+    ); 
+
+    link.setSourcePort(timeoutPorts[0])
+    let diagramModel = diagramEngine.getDiagramModel();
+    const secondHSMContent = diagramModel.getNode(this.secondHSM.secondHSMNodeId);
+    // secondHSMContent.deSerialize(this.secondHSM.secondHSMContent)
+    const inPorts = Object.values(secondHSMContent.getPorts()).filter(
+      (port) => port.in == true
+    );
+    link.setTargetPort(inPorts[0])
+    diagramModel.addLink(link);
+    diagramEngine.forceUpdate();
+  }
+
+  deleteSecondHSM() {
+    this.secondHSM = {
+      secondHSMContent: null,
+      secondHSMSendTime: null,
+      secondHSMNodeId: null,
+    }
   }
 
   getAPISchema(nodeIDToAPIID) {
@@ -223,6 +310,19 @@ export class HSMNodeModel extends QuestionNodeModel {
         } else {
           apiSchema["save_on_classified_type"] = variableType;
         }
+      }
+    }
+
+    const timeoutPort = this.getNotAnswerTimeoutPort();
+    if (timeoutPort) {
+      let targetNode = timeoutPort.getTargetNode();
+
+      if (targetNode) {
+        apiSchema["question_not_answer_timeout"] = {
+          seconds: timeoutPort.getTimeout() * 60,
+          to_question_id: nodeIDToAPIID(targetNode.getID()),
+          webhook: timeoutPort.getWebhook(),
+        };
       }
     }
     return apiSchema;

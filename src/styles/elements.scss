@@ -771,4 +771,16 @@ button.btn,
     -webkit-mask: url(#{$iconsPath}/Go-Icon.svg) no-repeat center;
     mask: url(#{$iconsPath}/Go-Icon.svg) no-repeat center; 
   }
+
+  &--alarm-clock {
+    background-image: url(#{$iconsPath}/alarm_clock.svg);
+    width: 16px;
+    height: 16px;
+  }
+
+  &--warning {
+    background-image: url(#{$iconsPath}/Attention-Icon.svg);
+    width: 16px;
+    height: 16px;
+  }
 }

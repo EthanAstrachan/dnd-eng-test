@@ -5,6 +5,7 @@ module.exports = {
     config: "Configuración",
     duplicate: "Duplicar",
     delete: "Eliminar",
+    edit: "Editar",
     conecctions: "Conexiones",
     tooltipMsg1:
       "Selecciona un bloque y usa el nodo circular para arrastrar la conexion a otro bloque",
@@ -79,6 +80,7 @@ module.exports = {
     config: "Configuration",
     duplicate: "Duplicate",
     delete: "Delete",
+    edit: "Edit",
     conecctions: "Connections",
     tooltipMsg1:
       "Select a block and use the circular node to drag the connection to another block",

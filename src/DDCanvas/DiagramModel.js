@@ -19,6 +19,7 @@ export class DiagramModel extends BaseEntity {
     this.enableHistory = true;
 
     this.historyChanged = onHistoryChange;
+    this.hasSecondHSMNode = false;
   }
 
   deSerializeDiagram(object, diagramEngine, forceInactiveHistory = false) {
@@ -123,6 +124,11 @@ export class DiagramModel extends BaseEntity {
     this.historyIndex = this.history.length - 1;
     console.log("PUSH HISTORY", this.history, this.historyIndex);
     this.historyChanged();
+  }
+
+  updateHistoryDueToSecondHSM() {
+    this.history[this.historyIndex] = this.serializeDiagram();
+    console.log("UPDATE HISTORY", this.history, this.historyIndex);
   }
 
   canUndo() {
@@ -264,6 +270,14 @@ export class DiagramModel extends BaseEntity {
     });
   }
 
+  setHasSecondHSMNode(value) {
+    this.hasSecondHSMNode = value;
+  }
+
+  getHasSecondHSMNode() {
+    return this.hasSecondHSMNode;
+  }
+
   getOffsetY() {
     return this.offsetY;
   }
@@ -378,6 +392,20 @@ export class DiagramModel extends BaseEntity {
           listener.nodesUpdated();
         }
       });
+
+      if (node.secondHSM?.secondHSMContent) {
+        const secondHSMNode = this.getNode(node.secondHSM.secondHSMNodeId);
+        this.removeNode(secondHSMNode);
+        this.setHasSecondHSMNode(false);
+      }
+
+      if (node.isSecondHSM) {
+        const parentNode = this.getNode(node.parentHSMId);
+        if (parentNode) {
+          parentNode.deleteSecondHSM();
+        }
+        this.setHasSecondHSMNode(false);
+      }
     } else {
       delete this.nodes[_.toString(node)];
       this.itterateListeners((listener) => {
