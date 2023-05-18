@@ -171,6 +171,15 @@ export class HSMNodeModel extends QuestionNodeModel {
     this.addPort(timeoutPort);
   }
 
+  getNotAnswerTimeoutPort() {
+    const outPorts = Object.values(this.getPorts()).filter(
+      (port) => port.in == false
+    );
+    return outPorts.filter(
+      (port) => port.answerType === ANSWER_PORT_TYPE_TIMEOUT
+    )[0];
+  }
+
   getAnswerClosedPorts() {
     const outPorts = Object.values(this.getPorts()).filter(
       (port) => port.in == false

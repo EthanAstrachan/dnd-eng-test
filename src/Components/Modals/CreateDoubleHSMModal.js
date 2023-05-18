@@ -66,7 +66,8 @@ const CreateDoubleHSMModalComponent = (props) => {
     const validForm =
         state.isValidTimeFrame && state.secondHSM
 
-    const createDoubleHSM = () => {
+    const createDoubleHSM = async () => {
+        await props.closeModal()
         const {node, diagramEngine} = props;
         const {secondHSM, secondHSMSendTime} = state;
 
@@ -88,12 +89,10 @@ const CreateDoubleHSMModalComponent = (props) => {
         }
 
         diagramModel.addNode(nodeModel);
-        diagramEngine.forceUpdate();
-        
         node.addSecondHSM(nodeModel, secondHSMSendTime, secondHSMNodeId)
         node.addSecondHSMLink(diagramEngine);
         diagramModel.updateHistoryDueToSecondHSM();
-        props.closeModal()
+        diagramEngine.forceUpdate();
     };
 
     const renderHSMDropdownItem = (hsm) => {

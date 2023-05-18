@@ -41,7 +41,6 @@ export class HSMNodeWidget extends React.Component {
       if (!secondHSMContent) {
         nodeModel.x = this.props.node.x + 400;
         nodeModel.y = this.props.node.y;
-        // secondHSMNodeId = nodeModel.getID();
       } else {
           let secondHSMNode = secondHSMContent;
           if (secondHSMNode) {
@@ -333,9 +332,9 @@ export class HSMNodeWidget extends React.Component {
 
   renderHSMEditButtonPort() {
     const { node } = this.props;
-    const secondHSMPort = node.getSecondHSMPort()[0];
+    const secondHSMPort = node.getNotAnswerTimeoutPort();
 
-    if (!secondHSMPort) return null;
+    if (!secondHSMPort || !node.secondHSM.secondHSMContent) return null;
 
     return (
       <div className="default-answer-port-container">
@@ -343,6 +342,7 @@ export class HSMNodeWidget extends React.Component {
           diagramEngine={this.props.diagramEngine}
           port={secondHSMPort}
           key={secondHSMPort.getID()}
+          secondHSM={true}
         > {this.renderDoubleHSMButtons()} 
         </AnswerPortWidget>
       </div>
@@ -408,8 +408,7 @@ export class HSMNodeWidget extends React.Component {
           {this.renderAnswerClosedPorts()}
           {this.renderDefaultClosedAnswerPort()}
           {this.renderCallToActionButtons()}
-          {this.renderDoubleHSMButtons()}
-          {/* {this.renderHSMEditButtonPort()} */}
+          {this.renderHSMEditButtonPort()}
         </div>
       </div>
     );

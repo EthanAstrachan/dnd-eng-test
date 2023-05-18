@@ -258,7 +258,7 @@ export default class AnswerPortWidget extends React.Component {
     this.props.diagramEngine.forceUpdate();
   }
 
-  renderAnswerPortTimeout(port) {
+  renderAnswerPortTimeout(port, secondHSM = false) {
     let node = port.getParent();
     const showLinkRoute = port.getShowLinkRoute() && !_.isEqual(port.links, {});
     return (
@@ -286,13 +286,19 @@ export default class AnswerPortWidget extends React.Component {
               className={`ball port closed ${showLinkRoute ? "show-link" : ""}`}
               data-name={port.getID()}
               data-nodeid={node.getID()}
+              id={port.getID()}
             >
               {showLinkRoute && <div className="icon icon--arrow-forward" />}
             </div>
           </div>
-          <div className="answer-input-container">
-            <AnswerPortWidgetTimeoutTextarea node={node} port={port} />
-          </div>
+          {
+            !secondHSM ? 
+              <div className="answer-input-container">
+                <AnswerPortWidgetTimeoutTextarea node={node} port={port} />
+              </div> : 
+              this.props.children
+          }
+          
         </div>
       </div>
     );
@@ -697,13 +703,13 @@ export default class AnswerPortWidget extends React.Component {
   }
 
   render() {
-    const { port } = this.props;
+    const { port, secondHSM } = this.props;
     if (port.answerType == ANSWER_PORT_TYPE_OPEN)
       return this.renderAnswerPortOpen(port);
     if (port.answerType == ANSWER_PORT_TYPE_CLOSED)
       return this.renderAnswerPortClosed(port);
     if (port.answerType == ANSWER_PORT_TYPE_TIMEOUT)
-      return this.renderAnswerPortTimeout(port);
+      return this.renderAnswerPortTimeout(port, secondHSM);
     if (port.answerType == ANSWER_PORT_TYPE_DEFAULT_CONDITION)
       return this.renderAnswerPortDefaultCondition(port);
     if (port.answerType == ANSWER_PORT_TYPE_CONDITION)
