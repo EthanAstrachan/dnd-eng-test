@@ -19,6 +19,7 @@ export class DiagramModel extends BaseEntity {
     this.enableHistory = true;
 
     this.historyChanged = onHistoryChange;
+    this.hasSecondHSMNode = false;
   }
 
   deSerializeDiagram(object, diagramEngine, forceInactiveHistory = false) {
@@ -269,6 +270,14 @@ export class DiagramModel extends BaseEntity {
     });
   }
 
+  setHasSecondHSMNode(value) {
+    this.hasSecondHSMNode = value;
+  }
+
+  getHasSecondHSMNode() {
+    return this.hasSecondHSMNode;
+  }
+
   getOffsetY() {
     return this.offsetY;
   }
@@ -387,6 +396,7 @@ export class DiagramModel extends BaseEntity {
       if (node.secondHSM?.secondHSMContent) {
         const secondHSMNode = this.getNode(node.secondHSM.secondHSMNodeId);
         this.removeNode(secondHSMNode);
+        this.setHasSecondHSMNode(false);
       }
 
       if (node.isSecondHSM) {
@@ -394,6 +404,7 @@ export class DiagramModel extends BaseEntity {
         if (parentNode) {
           parentNode.deleteSecondHSM();
         }
+        this.setHasSecondHSMNode(false);
       }
     } else {
       delete this.nodes[_.toString(node)];

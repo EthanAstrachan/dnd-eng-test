@@ -32,10 +32,10 @@ export class HSMNodeWidget extends React.Component {
 
   componentDidMount() {
     const {node, diagramEngine} = this.props;
-    if (node.secondHSM?.secondHSMContent) {
+    let diagramModel = diagramEngine.getDiagramModel();
+    if (node.secondHSM?.secondHSMContent && !diagramModel.getHasSecondHSMNode()) {
       const secondHSMContent = new HSMNodeModel();
       secondHSMContent.deSerialize(node.secondHSM.secondHSMContent)
-      let diagramModel = diagramEngine.getDiagramModel();
       let nodeModel = new HSMNodeModel({...secondHSMContent.hsm, isSecondHSM: true, parentHSMId: node.getID()});
 
       if (!secondHSMContent) {
@@ -51,6 +51,7 @@ export class HSMNodeWidget extends React.Component {
       }
 
       diagramModel.addNode(nodeModel);
+      diagramModel.setHasSecondHSMNode(true);
       diagramEngine.forceUpdate();
     }
   }
@@ -362,8 +363,9 @@ export class HSMNodeWidget extends React.Component {
   }
 
   render() {
-    const { node } = this.props;
+    const { node, diagramEngine } = this.props;
     const answerOpenPort = node.getAnswerOpenPort();
+    const diagramModel = diagramEngine.getDiagramModel();
 
     const { name, color } = node;
     const style = {};
@@ -383,7 +385,7 @@ export class HSMNodeWidget extends React.Component {
             />
           </div>
           {
-            !node.secondHSM.secondHSMContent && !node.isSecondHSM ? 
+            !node.secondHSM.secondHSMContent && !node.isSecondHSM && !diagramModel.getHasSecondHSMNode() ?
               <SetDoubleHSMButton
                 node={node}
                 forceUpdate={this.forceUpdate.bind(this)}
