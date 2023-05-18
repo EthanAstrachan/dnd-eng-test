@@ -411,6 +411,7 @@ export class HSMNodeWidget extends React.Component {
           {this.renderDefaultClosedAnswerPort()}
           {this.renderCallToActionButtons()}
           {this.renderHSMEditButtonPort()}
+          {this.renderCreateTargetModal()}
         </div>
       </div>
     );

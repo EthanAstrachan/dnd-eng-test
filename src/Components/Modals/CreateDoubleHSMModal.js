@@ -81,8 +81,7 @@ const CreateDoubleHSMModalComponent = (props) => {
             secondHSMNodeId = nodeModel.getID();
         } 
         else {
-            const secondHSMNode = new HSMNodeModel();
-            secondHSMNode.deSerialize(node.secondHSM.secondHSMContent)
+            const secondHSMNode = diagramModel.getNode(node.secondHSM.secondHSMNodeId);
             nodeModel.id = secondHSMNode.getID();
             nodeModel.x = secondHSMNode.x;
             nodeModel.y = secondHSMNode.y;
